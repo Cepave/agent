@@ -12,7 +12,9 @@ import (
 
 func main() {
 
-	cfg := flag.String("c", "cfg.json", "configuration file")
+	cfgDefault := g.SetDefaultConfig("cfg.json")
+
+	cfg := flag.String("c", cfgDefault, "configuration file")
 	version := flag.Bool("v", false, "show version")
 	check := flag.Bool("check", false, "check collector")
 
