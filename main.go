@@ -3,16 +3,18 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/cepave/agent/cron"
-	"github.com/cepave/agent/funcs"
-	"github.com/cepave/agent/g"
-	"github.com/cepave/agent/http"
+	"github.com/Cepave/agent/cron"
+	"github.com/Cepave/agent/funcs"
+	"github.com/Cepave/agent/g"
+	"github.com/Cepave/agent/http"
 	"os"
 )
 
 func main() {
 
-	cfg := flag.String("c", "cfg.json", "configuration file")
+	cfgDefault := g.SetDefaultConfig("cfg.json")
+
+	cfg := flag.String("c", cfgDefault, "configuration file")
 	version := flag.Bool("v", false, "show version")
 	check := flag.Bool("check", false, "check collector")
 

@@ -124,3 +124,12 @@ func ParseConfig(cfg string) {
 
 	log.Println("read config file:", cfg, "successfully")
 }
+
+func SetDefaultConfig(cfg string) string {
+        if !file.IsExist(cfg) {
+                log.Println("default config file:", cfg, "is not existent. Change default config file to config/agent.json.")
+                return "../../config/agent.json"
+        }
+
+	return cfg
+}
