@@ -1,9 +1,9 @@
 package cron
 
 import (
-	"github.com/cepave/agent/funcs"
-	"github.com/cepave/agent/g"
-	"github.com/cepave/common/model"
+	"github.com/Cepave/agent/funcs"
+	"github.com/Cepave/agent/g"
+	"github.com/Cepave/common/model"
 	"time"
 )
 
@@ -21,7 +21,7 @@ func Collect() {
 		return
 	}
 
-	if g.Config().Transfer.Addr == "" {
+	if len(g.Config().Transfer.Addrs) == 0 {
 		return
 	}
 
@@ -31,9 +31,9 @@ func Collect() {
 }
 
 func collect(sec int64, fns []func() []*model.MetricValue) {
-
+	t := time.NewTicker(time.Second * time.Duration(sec)).C
 	for {
-		time.Sleep(time.Duration(sec) * time.Second)
+		<-t
 
 		hostname, err := g.Hostname()
 		if err != nil {
