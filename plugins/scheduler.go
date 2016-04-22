@@ -8,6 +8,7 @@ import (
 	"github.com/toolkits/file"
 	"github.com/toolkits/sys"
 	"log"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
@@ -44,19 +45,37 @@ func (this *PluginScheduler) Stop() {
 	close(this.Quit)
 }
 
+func setFileMod(fpath string, mod os.FileMode) bool {
+	info, _ := os.Stat(fpath)
+	log.Println("[INFO] show plugin script file mode: ", info.Mode())
+
+	err := os.Chmod(fpath, mod)
+	if err != nil {
+		log.Println(err)
+		log.Println("[ERROR] cannot set file permission as ", mod, fpath)
+		return false
+	}
+	return true
+}
+
 func PluginRun(plugin *Plugin) {
 
 	timeout := plugin.Cycle*1000 - 500
 	fpath := filepath.Join(g.Config().Plugin.Dir, plugin.FilePath)
 
 	if !file.IsExist(fpath) {
-		log.Println("no such plugin:", fpath)
+		log.Println("[ERROR] no such plugin:", fpath)
+		return
+	}
+
+	var fm os.FileMode = 0744
+	if !setFileMod(fpath, fm) {
 		return
 	}
 
 	debug := g.Config().Debug
 	if debug {
-		log.Println(fpath, "running...")
+		log.Println(fpath, "[DEBUG] running...")
 	}
 
 	cmd := exec.Command(fpath)
@@ -110,20 +129,19 @@ func PluginRun(plugin *Plugin) {
 		return
 	}
 
+	// fill in fields
+	sec := plugin.Cycle
+	now := time.Now().Unix()
+	hostname, err := g.Hostname()
+	if err != nil {
+		hostname = ""
+	}
 
-    // fill in fields
-    sec := plugin.Cycle
-    now := time.Now().Unix()
-    hostname, err := g.Hostname()
-    if err != nil {
-        hostname = ""
-    }
-
-    for j := 0; j < len(metrics); j++ {
-        metrics[j].Step = int64(sec)
-        metrics[j].Endpoint = hostname
-        metrics[j].Timestamp = now
-    }
+	for j := 0; j < len(metrics); j++ {
+		metrics[j].Step = int64(sec)
+		metrics[j].Endpoint = hostname
+		metrics[j].Timestamp = now
+	}
 
 	g.SendToTransfer(metrics)
 }
